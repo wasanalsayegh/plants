@@ -108,9 +108,12 @@ struct TrackerView: View {
                     .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Label("in \(plant.room)", systemImage: "location")
-                            .font(.caption2)
-                            .foregroundStyle(.gray)
+                        HStack(spacing: 4) {
+                            Image(systemName: "location")
+                            Text("in \(plant.room)")
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
                         Text(plant.name)
                             .font(.headline)
                             .foregroundStyle(plant.isDone ? .gray : .white)
@@ -138,12 +141,15 @@ struct TrackerView: View {
     }
 
     private func chip(icon: String, text: String) -> some View {
-        Label(text, systemImage: icon)
-            .font(.caption2)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Color.white.opacity(0.1))
-            .clipShape(Capsule())
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+            Text(text)
+        }
+        .font(.caption2)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(Color.white.opacity(0.1))
+        .clipShape(Capsule())
     }
 }
 

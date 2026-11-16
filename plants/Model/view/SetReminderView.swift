@@ -12,49 +12,65 @@ struct SetReminderView: View {
     @State private var days = "Every day"
     @State private var water = "20-50 ml"
 
+    private let fieldBackground = Color(white: 0.17)
+
     private var isEditing: Bool { plantToEdit != nil }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    HStack {
+            ScrollView {
+                VStack(spacing: 24) {
+
+                    // Plant Name
+                    HStack(spacing: 8) {
                         Text("Plant Name")
                         TextField("Pothos", text: $name)
                     }
-                }
+                    .padding(.horizontal, 20)
+                    .frame(height: 60)
+                    .background(fieldBackground, in: Capsule())
 
-                Section {
-                    Picker("Room", selection: $room) {
-                        ForEach(["Bedroom", "Living Room", "Kitchen", "Balcony"], id: \.self) { Text($0) }
+                    // Room + Light
+                    VStack(spacing: 0) {
+                        row(icon: "location", title: "Room", selection: $room,
+                            options: ["Bedroom", "Living Room", "Kitchen", "Balcony","Bathroom"])
+                        Divider().padding(.leading, 40)
+                        row(icon: "sun.max", title: "Light", selection: $light,
+                            options: ["Full sun", "Partial sun", "Low light"])
                     }
-                    Picker("Light", selection: $light) {
-                        ForEach(["Full sun", "Partial sun", "Low light"], id: \.self) { Text($0) }
-                    }
-                }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 6)
+                    .background(fieldBackground, in: RoundedRectangle(cornerRadius: 30))
 
-                Section {
-                    Picker("Watering Days", selection: $days) {
-                        ForEach(["Every day", "Every 2 days", "Every week"], id: \.self) { Text($0) }
+                    // Watering
+                    VStack(spacing: 0) {
+                        row(icon: "drop", title: "Watering Days", selection: $days,
+                            options: ["Every day", "Every 2 days", "Every week"])
+                        Divider().padding(.leading, 40)
+                        row(icon: "drop", title: "Water", selection: $water,
+                            options: ["20-50 ml", "50-100 ml", "100-200 ml"])
                     }
-                    Picker("Water", selection: $water) {
-                        ForEach(["20-50 ml", "50-100 ml", "100-200 ml"], id: \.self) { Text($0) }
-                    }
-                }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 6)
+                    .background(fieldBackground, in: RoundedRectangle(cornerRadius: 30))
 
-                if let plant = plantToEdit {
-                    Section {
+                    // Delete
+                    if let plant = plantToEdit {
                         Button(role: .destructive) {
                             store.delete(plant)
                             dismiss()
                         } label: {
                             Text("Delete Reminder")
                                 .frame(maxWidth: .infinity)
+                                .frame(height: 60)
+                                .background(fieldBackground, in: Capsule())
                         }
+                        .padding(.top, 20)
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
             }
-            .scrollContentBackground(.hidden)
             .background(Color(white: 0.11))
             .navigationTitle(isEditing ? "Edit Reminder" : "Set Reminder")
             .navigationBarTitleDisplayMode(.inline)
@@ -75,18 +91,42 @@ struct SetReminderView: View {
             }
             .onAppear {
                 if let p = plantToEdit {
-                    name = p.name; room = p.room; light = p.light
-                    days = p.days; water = p.water
+                    name = p.name
+                    room = p.room
+                    light = p.light
+                    days = p.days
+                    water = p.water
                 }
             }
         }
         .preferredColorScheme(.dark)
     }
 
+    // One row: white icon + title + picker
+    private func row(icon: String, title: String,
+                     selection: Binding<String>, options: [String]) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundStyle(.white)
+                .frame(width: 24)
+            Text(title)
+            Spacer()
+            Picker("", selection: selection) {
+                ForEach(options, id: \.self) { Text($0) }
+            }
+            .pickerStyle(.menu)
+            .tint(.secondary)
+        }
+        .frame(height: 48)
+    }
+
     private func save() {
         if var p = plantToEdit {
-            p.name = name; p.room = room; p.light = light
-            p.days = days; p.water = water
+            p.name = name
+            p.room = room
+            p.light = light
+            p.days = days
+            p.water = water
             store.update(p)
         } else {
             store.add(Plant(name: name, room: room, light: light, days: days, water: water))
